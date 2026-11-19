@@ -1,0 +1,452 @@
+/* All styling for the Animator app. The .gleam files only attach class names. */
+
+:root {
+  /* Pink + white only */
+  --ink: #4a2c38;
+  --ink-dim: #6b4454;
+  --ink-bright: #ffffff;
+  --panel: #f0b6c8;
+  --panel-2: #f5c6d4;
+  --panel-3: #f7d0dc;
+  --line: #ffffff;
+  --line-soft: #e8a8bc;
+  --accent: #f0b6c8;
+  --accent-2: #ffffff;
+  --danger: #c45d82;
+  --ok: #ffffff;
+  --canvas-bg: #f0b6c8;
+  --font-ui: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+/* ── Layout: two columns ─────────────────────────────────────────────────── */
+
+.app {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, #f7d0dc 0%, transparent 55%),
+    radial-gradient(900px 500px at 100% 100%, #f0b6c8 0%, transparent 50%),
+    #f0b6c8;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 14px;
+}
+
+/* Left column: the code editor. */
+.code-col {
+  width: 42%;
+  min-width: 320px;
+  max-width: 720px;
+  flex-shrink: 0;
+  display: flex;
+  border-right: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, #f7d0dc 0%, #f0b6c8 100%);
+  box-shadow: 8px 0 32px rgba(240, 182, 200, 0.45);
+}
+
+/* The code column stays in the DOM when collapsed, so CodeMirror keeps its
+   state; hiding it gives the right column the full width. */
+.app.code-hidden .code-col { display: none; }
+
+/* A small emoji button (the code pane's collapse toggle, and the playback
+   controls once they exist). */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--panel-3);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 7px 12px;
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease,
+    color 160ms ease;
+}
+.icon-btn:hover {
+  background: #ffffff;
+  border-color: #f0b6c8;
+  color: #5a3d4a;
+}
+.icon-btn:active { transform: translateY(1px); }
+
+/* ── Code panel (left column) ───────────────────────────────────────────── */
+
+.code-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f7d0dc 100%);
+  border-bottom: 1px solid var(--line-soft);
+}
+.code-title {
+  color: #4a2c38;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* Wrapper holding the editor. */
+.code-editor-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+}
+/* CodeMirror mount node: grows to fill the panel. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  background: #ffe4ec;
+}
+.code-editor .cm-editor { width: 100%; height: 100%; }
+
+/* Collapsible reference of the built-ins available to draw functions. */
+.reference {
+  margin: 10px 14px 12px;
+  border: 1px solid #ffffff;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+}
+.reference-summary {
+  padding: 8px 14px;
+  cursor: pointer;
+  color: #4a2c38;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  user-select: none;
+  transition: color 160ms ease;
+}
+.reference-summary:hover { color: #a84d6e; }
+.reference-body {
+  padding: 4px 14px 12px;
+  border-top: 1px solid var(--line-soft);
+}
+.reference-group { margin-top: 10px; }
+.reference-group-title {
+  color: #a84d6e;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.reference-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 2px 0;
+}
+.reference-sig {
+  color: #4a2c38;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre;
+}
+.reference-desc { color: #6b4454; font-size: 11px; }
+
+/* ── Animation area (right column) ──────────────────────────────────────── */
+
+.canvas-area {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 45%, #f7d0dc 0%, transparent 65%),
+    radial-gradient(circle at 20% 80%, rgba(240, 182, 200, 0.9), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(240, 182, 200, 0.85), transparent 35%),
+    #f0b6c8;
+  container-type: size;
+}
+
+.canvas-area::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(240, 182, 200, 0.55) 0%, transparent 22%),
+    linear-gradient(0deg, rgba(232, 168, 188, 0.5) 0%, transparent 30%);
+  z-index: 1;
+}
+
+/* The interpreter's List(Path) (or its error), shown as text before the
+   animation pane is built. */
+.output {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 5;
+  max-height: 40%;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: #5a3d4a;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(240, 182, 200, 0.8);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  animation: panel-in 220ms ease;
+}
+/* Leave room for the reveal button, which only overlays this pane while the
+   code column is hidden. */
+.app.code-hidden .output { padding-top: 48px; top: 52px; }
+
+/* Button that reveals the code column again when it is hidden. */
+.reveal-code {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+}
+
+/* A centred square that fits the (possibly non-square) animation area. Give your
+   <canvas> this class, so that drawings aren't stretched. */
+.canvas {
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px #c45d82,
+    0 24px 60px rgba(196, 93, 130, 0.28);
+  background: #f7d0dc;
+}
+
+/* Shape and speed sliders overlaid on the animation pane. */
+.controls {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #c45d82;
+  border-radius: 16px;
+  backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 12px 40px rgba(196, 93, 130, 0.25);
+  animation: panel-in 280ms ease;
+}
+.control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 160px;
+  color: #4a2c38;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.control > span {
+  min-width: 3.6rem;
+}
+.control input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+  accent-color: var(--accent);
+  height: 4px;
+  cursor: pointer;
+}
+.control select {
+  flex: 1;
+  min-width: 100px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.control select:hover,
+.control select:focus {
+  border-color: var(--accent);
+  outline: none;
+  background: var(--panel-2);
+}
+
+.game-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 100%;
+  padding-top: 4px;
+  border-top: 1px solid rgba(240, 182, 200, 0.55);
+}
+.game-status {
+  flex: 1 1 180px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #c45d82;
+  color: #4a2c38;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  transition: background 200ms ease, border-color 200ms ease, color 200ms ease;
+}
+.game-status-idle {
+  color: #4a2c38;
+  background: rgba(255, 255, 255, 0.9);
+  border-color: #c45d82;
+}
+.game-controls .icon-btn {
+  min-height: 34px;
+}
+.game-hint {
+  width: 100%;
+  color: #6b4454;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.game-status-playing {
+  color: #4a2c38;
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #c45d82;
+}
+.game-status-won {
+  color: #4a2c38;
+  background: #ffffff;
+  border-color: #a84d6e;
+}
+.game-status-lost {
+  color: #4a2c38;
+  background: #ffe4ec;
+  border-color: #c45d82;
+}
+
+.btn-play {
+  background-color: #c45d82;
+  background-image: linear-gradient(180deg, #c45d82 0%, #a84d6e 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  min-width: 72px;
+  font-weight: 700;
+}
+.btn-play:hover {
+  background-color: #d4789a;
+  background-image: linear-gradient(180deg, #d4789a 0%, #c45d82 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+.btn-retry {
+  background-color: #a84d6e;
+  background-image: linear-gradient(180deg, #c45d82 0%, #a84d6e 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+  min-width: 110px;
+  font-weight: 700;
+}
+.btn-retry:hover {
+  background-color: #d4789a;
+  background-image: linear-gradient(180deg, #d4789a 0%, #c45d82 100%);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+.btn-reset {
+  background: #ffffff;
+  color: #4a2c38;
+  border-color: #c45d82;
+}
+.btn-reset:hover {
+  color: #a84d6e;
+  background: #ffe4ec;
+}
+
+.dpad {
+  display: flex;
+  align-items: center;
+}
+.dpad-row {
+  display: inline-flex;
+  gap: 6px;
+}
+.btn-pad {
+  min-width: 40px;
+  font-size: 16px;
+  font-weight: 700;
+  background: #ffffff;
+  color: #4a2c38;
+  border-color: #c45d82;
+  user-select: none;
+  touch-action: none;
+}
+.btn-pad:hover,
+.btn-pad:active {
+  background: #c45d82;
+  color: #ffffff;
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .code-col {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+  .controls {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 12px;
+    gap: 10px;
+  }
+  .game-status {
+    flex: 1 1 100%;
+  }
+}
